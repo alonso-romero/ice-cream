@@ -1,1 +1,1 @@
-# ice-cream
+![Repo Image](docs/fig/title.png)
