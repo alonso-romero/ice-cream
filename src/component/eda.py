@@ -1,19 +1,11 @@
 # import necessary libraries
 import os
-import zipfile
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as stats
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
-from sklearn.model_selection import train_test_split
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.metrics import accuracy_score, confusion_matrix
-import prince
-from collections import Counter
-import re
+import itertools
 
 # set random seed for reproducibility
 np.random.seed(42)
@@ -161,3 +153,30 @@ for i, brand in enumerate(unique_brands):
     plt.close()
 
 print("Saved: Individual brand graphs")
+
+# ==============================================
+print("\n--- Statistical Analysis ---")
+# ==============================================
+
+# Basic Stats
+mean_rating = products['Rating'].mean()
+sd_rating = products['Rating'].std()
+print(f"Overall Mean Rating: {mean_rating:.3f}")
+print(f"Overall Std Dev: {sd_rating:.3f}")
+
+# Shapiro-Wilk
+shapiro_stat, shapiro_p = stats.shapiro(products['Rating'].dropna())
+print(f"\nShapiro-Wilk P-Value: {shapiro_p:.5f} ({'Normal' if shapiro_p > 0.05 else 'Not Normal'})")
+
+# Comparison Stats Loop
+print("\nPairwise Comparisons (T-Tests):")
+brand_pairs = list(itertools.combinations(unique_brands, 2))
+
+for brand1, brand2 in brand_pairs:
+    r1 = products[products['Brand'] == brand1]['Rating'].dropna()
+    r2 = products[products['Brand'] == brand2]['Rating'].dropna()
+    
+    t_stat, t_p = stats.ttest_ind(r1, r2, equal_var=False)
+    sig = "SIGNIFICANT" if t_p < 0.05 else "Not Significant"
+    print(f"\n  {brand1} vs {brand2}: p-value = {t_p:.4f} ({sig})")
+
