@@ -22,10 +22,15 @@ print("\n--- Setting up Paths ---")
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, '..','data', 'combined')
 results_dir = os.path.join(script_dir, '..', 'results', 'EDA')
+cleaned_data_dir = os.path.join(script_dir, '..', 'data', 'clean-data')
 
 # create the results directory if it doesn't exist
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
+
+# create the clean data directory if it doesn't exist
+if not os.path.exists(cleaned_data_dir):
+    os.makedirs(cleaned_data_dir)
 
 # ==============================================
 print("\n--- Loading Data ---")
@@ -178,5 +183,16 @@ for brand1, brand2 in brand_pairs:
     
     t_stat, t_p = stats.ttest_ind(r1, r2, equal_var=False)
     sig = "SIGNIFICANT" if t_p < 0.05 else "Not Significant"
-    print(f"\n  {brand1} vs {brand2}: p-value = {t_p:.4f} ({sig})")
+    print(f"  {brand1} vs {brand2}: p-value = {t_p:.4f} ({sig})")
 
+# ==============================================
+print("\n--- Saving Processed Data ---")
+
+clean_products_path = os.path.join(cleaned_data_dir, "products_clean.csv")
+clean_reviews_path = os.path.join(cleaned_data_dir, "reviews_clean.csv")
+
+# Save to CSV without the pandas index column
+products.to_csv(clean_products_path, index=False)
+reviews.to_csv(clean_reviews_path, index=False)
+
+print("Cleaned data saved successfully.")
