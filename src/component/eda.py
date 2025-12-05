@@ -23,7 +23,7 @@ sns.set_theme(style="whitegrid")
 plt.rcParams['figure.figsize'] = (10, 6)
 
 # ==============================================
-print("--- Setting up Paths ---")
+print("\n--- Setting up Paths ---")
 # ==============================================
 
 # path setup
@@ -34,12 +34,9 @@ results_dir = os.path.join(script_dir, '..', 'results', 'EDA')
 # create the results directory if it doesn't exist
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
-    print(f"Created directory: {results_dir}")
-else:
-    print(f"Directory already exists: {results_dir}")
 
 # ==============================================
-print("--- Loading Data ---")
+print("\n--- Loading Data ---")
 # ==============================================
 
 try:
@@ -56,7 +53,7 @@ except Exception as e:
     exit()
 
 # ==============================================
-print(" --- Cleaning and Preprocessing ---")
+print("\n--- Cleaning and Preprocessing ---")
 # ==============================================
 
 # rename columns
@@ -88,3 +85,79 @@ is_bar_name = products['ProductName'].astype(str).str.contains('\bBar\b', case=F
 is_bar_sub = products['Subhead'].astype(str).str.contains('\bBar\b', case=False, regex=True)
 products['Is_Bar'] = (is_bar_name | is_bar_sub).astype(int)
 
+print("Data cleaning and preprocessing complete.")
+
+# ==============================================
+print("\n--- Generating Graphs and Visualizations ---")
+# ==============================================
+
+# 1. Overall Rating Histogram
+plt.figure(figsize=(8, 5))
+sns.histplot(products['Rating'], bins=10, kde=False, color='skyblue', edgecolor='blue')
+plt.title("Overall Ice Cream Product Rating Histogram")
+plt.xlabel("Rating")
+plt.ylabel("Frequency")
+output_path = os.path.join(results_dir, "01_overall_rating_histogram.pdf")
+plt.savefig(output_path)
+plt.close()
+print("Saved: Overall Rating Histogram")
+
+# 2. QQ Plot
+plt.figure(figsize=(6, 6))
+stats.probplot(products['Rating'].dropna(), dist="norm", plot=plt)
+plt.title("QQ Plot of Product Ratings")
+output_path = os.path.join(results_dir, "02_rating_qq_plot.pdf")
+plt.savefig(output_path)
+plt.close()
+print("Saved: QQ Plot of Product Ratings")
+
+# 3. Boxplot by Brand
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=products, x='Brand', y='Rating', hue='Brand', legend=False, palette="Set3")
+plt.title("Distribution of Ratings Across Brands")
+output_path = os.path.join(results_dir, "03_comparative_brand_boxplot.pdf")
+plt.savefig(output_path)
+plt.close()
+print("Saved: Distribution of Ratings Across Brands")
+
+# 4. Density Plot
+plt.figure(figsize=(10, 6))
+sns.kdeplot(data=products, x='Rating', hue='Brand', fill=True, alpha=0.4, palette="Set2")
+plt.title("Density of Ratings Across Brands")
+output_path = os.path.join(results_dir, "04_comparative_brand_density.pdf")
+plt.savefig(output_path)
+plt.close()
+print("Saved: Density of Ratings Across Brands")
+
+unique_brands = products['Brand'].unique()
+colors = {'bj': '#6dbf75', 'hd': '#dca963', 'talenti': '#a73e5c', 'breyers': '#337ab7'}
+
+for i, brand in enumerate(unique_brands):
+    brand_data = products[products['Brand'] == brand].copy()
+    color = colors.get(brand, 'gray') # Default to gray if brand not in dict
+    
+    # 5.x Brand Histogram
+    plt.figure(figsize=(8, 5))
+    sns.histplot(brand_data['Rating'], bins=10, color=color, edgecolor='black')
+    plt.title(f"{brand.title()} - Product Rating Histogram")
+    plt.xlabel("Rating")
+    plt.ylabel("Frequency")
+    
+    filename = f"05_{brand}_rating_histogram.pdf"
+    output_path = os.path.join(results_dir, filename)
+    plt.savefig(output_path)
+    plt.close()
+
+    # 6.x Brand Scatter Plot
+    plt.figure(figsize=(12, 6))
+    sns.scatterplot(data=brand_data, x='ProductID', y='Rating', color=color, s=100)
+    plt.xticks(rotation=90, fontsize=6)
+    plt.title(f"{brand.title()} - Ratings per Product")
+    plt.tight_layout()
+    
+    filename = f"06_{brand}_product_scatter.pdf"
+    output_path = os.path.join(results_dir, filename)
+    plt.savefig(output_path)
+    plt.close()
+
+print("Saved: Individual brand graphs")
