@@ -54,3 +54,37 @@ try:
 except Exception as e:
     print(f"Error loading data: {e}")
     exit()
+
+# ==============================================
+print(" --- Cleaning and Preprocessing ---")
+# ==============================================
+
+# rename columns
+products = products.rename(columns={
+    "brand": "Brand", "key": "ProductID", "name": "ProductName",
+    "subhead": "Subhead", "description": "ProductDescription",
+    "rating": "Rating", "rating_count": "RatingCount", "ingredients": "Ingredients"
+})
+
+reviews = reviews.rename(columns={
+    "brand": "Brand", "key": "ProductID", "author": "Username",
+    "date": "Date", "stars": "Stars", "title": "Title",
+    "helpful_yes": "Helpful", "helpful_no": "Not Helpful",
+    "text": "Review", "taste": "Taste", "ingredients": "IngredientsDesc",
+    "texture": "Texture", "likes": "Likes"
+})
+
+# feature engineering
+def create_flag(df, column, pattern):
+    return df[column].astype(str).str.contains(pattern, case=False, na=False).astype(int)
+
+products['Has_Vanilla'] = create_flag(products, 'Ingredients', 'Vanilla')
+products['Has_Organic'] = create_flag(products, 'Ingredients', 'Organic')
+products['Has_Caramel'] = create_flag(products, 'Ingredients', 'Caramel')
+products['Has_Chocolate'] = create_flag(products, 'Ingredients', 'Chocolat|Coco')
+products['Has_Fruit'] = create_flag(products, 'Ingredients', 'Raspberr|Cherr|Blueberr|Banana')
+
+is_bar_name = products['ProductName'].astype(str).str.contains('\bBar\b', case=False, regex=True)
+is_bar_sub = products['Subhead'].astype(str).str.contains('\bBar\b', case=False, regex=True)
+products['Is_Bar'] = (is_bar_name | is_bar_sub).astype(int)
+
