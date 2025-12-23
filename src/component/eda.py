@@ -31,9 +31,9 @@ def run_eda():
 
     # path setup
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(script_dir, '..','data', 'combined')
+    data_dir = os.path.join(script_dir, '..','data', 'raw_data' 'combined')
     results_dir = os.path.join(script_dir, '..', 'results', 'EDA')
-    cleaned_data_dir = os.path.join(script_dir, '..', 'data', 'clean-data')
+    cleaned_data_dir = os.path.join(script_dir, '..', 'data', 'clean_data')
 
     # create the results directory if it doesn't exist
     if not os.path.exists(results_dir):
